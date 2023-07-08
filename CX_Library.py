@@ -19,7 +19,7 @@ class Library:
         self.acc = self.encrypt(phone)
         self.pwd = self.encrypt(password)
         self.seatId = None  # 旧版系统参数
-        self.deptIdEnc = None
+        self.deptIdEnc = 'ec13c5f928430eb4'
         self.deptId = None
         self.status = {
             '0': '待履约',
@@ -29,6 +29,12 @@ class Library:
             '5': '被监督中',
             '7': '已取消',
         }
+        self.roomInfo = {8988:'图书馆一楼自习区',
+                     6760:'图书馆二楼自习区',
+                     8076:'图书馆三楼自习区',
+                     8077:'图书馆四楼自习区',
+                     8078:'图书馆五楼自习区'}
+        self.targetRoom = 8988
         self.room = None
         self.room_id_capacity = {}
         self.room_id_name = {}
@@ -297,7 +303,7 @@ class Library:
             captcha = check.check_captcha(self.session)
             enc_data = {
                 'roomId': 3772,
-                'day': '2023-05-31',
+                'day': day,
                 'startTime': starttime,
                 'endTime': endtime,
                 'seatNum': '039',
@@ -321,18 +327,32 @@ class Library:
                                             f'deptIdEnc={self.deptIdEnc}')
             pageToken = re.compile(r"&pageToken=' \+ '(.*)' \+ '&").findall(response.text)[0]
             response = self.session.get(url='https://office.chaoxing.com/front/apps/seat/select?'
-                                            'id=3783&seatId=602'  # 房间id roomId 可以从self.room_id_name获取 请自行发挥
+                                            f'id={self.targetRoom}&'
                                             f'day={day}&'  # 预约时间 上下需保持一致
                                             'backLevel=2&'  # 必须的参数2
                                             f'pageToken={pageToken}')
-            token = re.compile("token = '(.*)'").findall(response.text)[0]
+            token = re.compile(r"token = '(.+?)'").findall(response.text)[0]
+            # 滑动验证码
+            captcha = check.check_captcha(self.session)
+            enc_data = {
+                'roomId': self.targetRoom,
+                'day': day,
+                'startTime': starttime,
+                'endTime': endtime,
+                'seatNum': seatNum,
+                'captcha': captcha,
+                'token': token
+            }
+            enc = check.enc(enc_data)
             response = self.session.get(url='https://office.chaoxing.com/data/apps/seat/submit?'
-                                            'roomId=3783&seatId=602&'  # 房间id roomId 上下需保持一致
+                                            f'roomId={self.targetRoom}&'  # 房间id roomId 上下需保持一致
                                             f'startTime={starttime_f}&'  # 开始时间%3A代表: 自行替换9（小时）和后面00（分钟） 必须
                                             f'endTime={endtime_f}&'  # 结束时间 规则同上
                                             f'day={day}&'  # 预约时间 上下需保持一致
                                             f'seatNum={seatNum}&'  # 座位数字 与桌上贴纸一致
-                                            f'token={token}')
+                                            f'captcha={captcha}&'
+                                            f'token={token}&'
+                                            f'enc={enc}')
             seat_result = response.json()
         if seat_result["success"]:
             info = seat_result["data"]["seatReserve"]
@@ -431,5 +451,6 @@ class Library:
 
 
 if __name__ == '__main__':
-    lib = Library("手机号", "密码", "版本:新版本为1/旧版本为0")
-    lib.submit('039', lib.today, '22:30', '23:00')  # 座位号 日期（今 明） 开始时间 结束时间
+    lib = Library("xxxxxxxxx", "xxxxxxx", "1") # 账号 密码 版本
+
+
