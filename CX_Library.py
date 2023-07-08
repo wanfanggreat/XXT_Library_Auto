@@ -325,7 +325,7 @@ class Library:
                                             f'day={day}&'  # 预约时间 上下需保持一致
                                             'backLevel=2&'  # 必须的参数2
                                             f'pageToken={pageToken}')
-            token = re.compile("token: '(.*)'").findall(response.text)[0]
+            token = re.compile("token = '(.*)'").findall(response.text)[0]
             response = self.session.get(url='https://office.chaoxing.com/data/apps/seat/submit?'
                                             'roomId=3783&seatId=602&'  # 房间id roomId 上下需保持一致
                                             f'startTime={starttime_f}&'  # 开始时间%3A代表: 自行替换9（小时）和后面00（分钟） 必须
