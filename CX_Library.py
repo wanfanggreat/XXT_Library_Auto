@@ -6,6 +6,7 @@ import check
 import requests
 import base64
 import time
+import schedule
 from datetime import date, timedelta
 
 from Crypto.Cipher import AES
@@ -294,7 +295,7 @@ class Library:
         if self.version == 0:
             # 旧版不需要pageToken
             response = self.session.get(url='https://office.chaoxing.com/front/apps/seatengine/select?'
-                                            'id=3783&seatId=602&'
+                                            f'id={self.targetRoom}&seatId=602&'
                                             f'fidEnc={self.deptIdEnc}'  # 房间id roomId 可以从self.room_id_name获取 请自行发挥
                                             f'day={day}&'  # 预约时间 上下需保持一致
                                             'backLevel=2')  # 必须的参数2
@@ -302,18 +303,18 @@ class Library:
             # 滑动验证码
             captcha = check.check_captcha(self.session)
             enc_data = {
-                'roomId': 3772,
+                'roomId': self.targetRoom,
                 'day': day,
                 'startTime': starttime,
                 'endTime': endtime,
-                'seatNum': '039',
+                'seatNum': seatNum,
                 'captcha': captcha,
                 'token': token
             }
             enc = check.enc(enc_data)
             response = self.session.get(url='https://office.chaoxing.com/data/apps/seatengine/submit?'
                                             # 'roomId=3772&seatId=039&'  # 房间id roomId 上下需保持一致
-                                            'roomId=3772&'  # 房间id roomId 上下需保持一致
+                                            f'roomId={self.targetRoom}&'  # 房间id roomId 上下需保持一致
                                             f'startTime={starttime_f}&'  # 开始时间%3A代表: 自行替换9（小时）和后面00（分钟） 必须
                                             f'endTime={endtime_f}&'  # 结束时间 规则同上
                                             f'day={day}&'  # 预约时间 上下需保持一致
@@ -361,6 +362,9 @@ class Library:
             endTime = self.t_time(info["endTime"])
             lastTime = info["duration"]
             print("预约成功! {}\n{}至{}共{}小时".format(seatInfo, startTime, endTime, lastTime))
+        else:
+            print("error,预约失败{}".format(seat_result))
+
 
     # 获取图书馆所有的房间和座位
     def get_all_room_and_seat(self):
@@ -449,8 +453,12 @@ class Library:
                 result += "今日剩余时段都空闲"
             return result
 
-
-if __name__ == '__main__':
-    lib = Library("xxxxxxxxx", "xxxxxxx", "1") # 账号 密码 版本
+def job(lib1, lib2):
+    lib1.submit('053', lib1.tomorrow, '09:00', '12:00')
+    lib2.submit('056', lib2.tomorrow, '09:00', '12:00')
+    lib2.submit('056', lib2.tomorrow, '14:00', '18:00')
+    lib1.submit('053', lib1.tomorrow, '14:00', '18:00')
+    lib2.submit('056', lib2.tomorrow, '19:00', '22:00')
+    lib1.submit('053', lib1.tomorrow, '19:00', '22:00')
 
 

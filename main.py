@@ -36,3 +36,4 @@ if __name__ == '__main__':
     # 等待线程完成
     thread1.join()
     thread2.join()
+    print("hello")
