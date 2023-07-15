@@ -451,6 +451,6 @@ class Library:
 
 
 if __name__ == '__main__':
-    lib = Library("xxxxx", "xxxxxxx", "1") # 账号 密码 版本
+    lib = Library("xxxxxxxxx", "xxxxxxx", "1") # 账号 密码 版本
 
 
