@@ -462,3 +462,6 @@ def job(lib1, lib2):
     lib1.submit('053', lib1.tomorrow, '19:00', '22:00')
 
 
+if __name__ == '__main__':
+    lib = Library("手机号", "密码", "版本:新版本为1/旧版本为0")
+    lib.submit('039', lib.today, '22:30', '23:00')  # 座位号 日期（今 明） 开始时间 结束时间
