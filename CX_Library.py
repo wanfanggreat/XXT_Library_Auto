@@ -6,7 +6,6 @@ import check
 import requests
 import base64
 import time
-import schedule
 from datetime import date, timedelta
 
 from Crypto.Cipher import AES

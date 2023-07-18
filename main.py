@@ -1,22 +1,29 @@
 import CX_Library as Library
-import schedule
 import time
 import threading
+import datetime
+import pytz
 
 def scheduled_start():
-    current_time = time.localtime()
-    target_time = time.strptime("12:00:00", "%H:%M:%S")
-    wait_time = (target_time.tm_hour - current_time.tm_hour) * 3600 + (target_time.tm_min - current_time.tm_min) * 60 + (target_time.tm_sec - current_time.tm_sec)
+    # Get the current time in the network's UTC timezone
+    current_time = datetime.datetime.now(pytz.timezone('UTC'))
+
+    # Convert the current time to Beijing timezone
+    beijing_timezone = pytz.timezone('Asia/Shanghai')
+    current_time_beijing = current_time.astimezone(beijing_timezone)
+    print("now time is: {}:{}:{}".format(current_time_beijing.hour, current_time_beijing.minute, current_time_beijing.second))
+
+    # Set the target time in Beijing timezone
+    target_time = datetime.datetime.strptime("12:00:00", "%H:%M:%S").time()
+
+    # Calculate the wait time in seconds
+    wait_time = (target_time.hour - current_time_beijing.hour) * 3600 + (target_time.minute - current_time_beijing.minute) * 60 + (target_time.second - current_time_beijing.second)
+
+    # Wait for the scheduled start time
     time.sleep(wait_time)
 
 def job(Library, seatNum):
-    Library.submit(seatNum, Library.tomorrow, '09:00', '13:00')
-    Library.submit(seatNum, Library.tomorrow, '13:00', '17:00')
-    Library.submit(seatNum, Library.tomorrow, '17:00', '21:00')
-    Library.submit(seatNum, Library.tomorrow, '21:00', '22:00')
-
-def job1(Library, seatNum):
-    Library.submit(seatNum, Library.tomorrow, '12:00', '12:30')
+    Library.submit(seatNum, Library.tomorrow, '10:30', '14:30')
 
 if __name__ == '__main__':
     lib1 = Library.Library("111111111111", "111111111", "1")
@@ -36,4 +43,3 @@ if __name__ == '__main__':
     # 等待线程完成
     thread1.join()
     thread2.join()
-    print("hello")
